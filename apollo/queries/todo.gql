@@ -3,5 +3,9 @@ query todos {
     id
     text
     done
+    user {
+      id
+      name
+    }
   }
 }

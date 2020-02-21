@@ -65,10 +65,12 @@ export default {
           }
         }`,
         // Mutate the previous result
-        updateQuery: (previousResult, { subscriptionData }) => {
+        updateQuery: (previousResult, fullData) => {
           // Here, return the new result from the previous with the new data
           console.log('previous:', previousResult)
-          console.log('subscriptionData:', subscriptionData)
+          console.log('subscriptionData:', fullData)
+
+          const { subscriptionData } = fullData
 
           const { todos } = previousResult
           const { data: { todoCreated } } = subscriptionData
@@ -76,6 +78,7 @@ export default {
           if (todos.map(d => d.id).filter(id => id === todoCreated.id).length <= 0) {
             todos.push(todoCreated)
           }
+          return previousResult
         }
       }
     }
@@ -92,7 +95,7 @@ export default {
       })
       console.log(result)
       this.token = result.data.token
-      await this.$apolloHelpers.onLogin(this.token)
+      // await this.$apolloHelpers.onLogin(this.token)
     },
     handleClick () {
       const newText = this.text
@@ -123,8 +126,8 @@ export default {
         update: (store, { data: { createTodo } }) => {
           // Read the data from our cache for this query.
           const data = store.readQuery({ query: todo })
-          console.log('data:', data)
-          console.log('createTodo:', createTodo)
+          // console.log('data:', data)
+          // console.log('createTodo:', createTodo)
           // Add our tag from the mutation to the end
           if (data.todos.map(d => d.id).filter(id => id === createTodo.id).length <= 0) {
             data.todos.push(createTodo)
