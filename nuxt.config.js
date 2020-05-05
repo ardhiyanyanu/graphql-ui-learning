@@ -50,10 +50,7 @@ export default {
   ],
   apollo: {
     clientConfigs: {
-      default: {
-        httpEndpoint: process.env.BACKEND_URL || 'http://localhost:8080/query/',
-        wsEndpoint: 'ws://127.0.0.1:8080/query'
-      }
+      default: '~/plugins/apollo/apollo.default.js'
     }
   },
   /*

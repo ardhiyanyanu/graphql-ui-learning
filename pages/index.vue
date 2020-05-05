@@ -8,14 +8,14 @@
       <h2 class="subtitle">
         Learning Graphql
       </h2>
-      <div v-if="!token" class="links">
+      <div v-if="token" class="links">
         <a-input v-model="email" placeholder="email" />
         <a-input v-model="password" placeholder="password" />
         <a-button @click="handleLoginClick()" type="primary">
           Login
         </a-button>
       </div>
-      <div v-if="token" class="links">
+      <div class="links">
         <ul id="example-1">
           <li v-for="item in todos" :key="item.text">
             {{ item.text }}
@@ -37,7 +37,7 @@
 import gql from 'graphql-tag'
 
 import Logo from '~/components/Logo.vue'
-import todo from '~/apollo/queries/todo'
+// import todo from '~/apollo/queries/todo'
 
 export default {
   data () {
@@ -51,33 +51,41 @@ export default {
   },
   apollo: {
     todos: {
-      query: todo,
-      subscribeToMore: {
-        document: gql`subscription {
-          todoCreated {
-            id
-            text
-            done
-            user {
-              id
-              name
-            }
-          }
-        }`,
-        // Mutate the previous result
-        updateQuery: (previousResult, { subscriptionData }) => {
-          // Here, return the new result from the previous with the new data
-          console.log('previous:', previousResult)
-          console.log('subscriptionData:', subscriptionData)
-
-          const { todos } = previousResult
-          const { data: { todoCreated } } = subscriptionData
-
-          if (todos.map(d => d.id).filter(id => id === todoCreated.id).length <= 0) {
-            todos.push(todoCreated)
-          }
+      query: gql`
+      query todos {
+        todos {
+          id @client
+          text @client
+          done @client
         }
       }
+      `
+      // subscribeToMore: {
+      //   document: gql`subscription {
+      //     todoCreated {
+      //       id
+      //       text
+      //       done
+      //       user {
+      //         id
+      //         name
+      //       }
+      //     }
+      //   }`,
+      //   // Mutate the previous result
+      //   updateQuery: (previousResult, { subscriptionData }) => {
+      //     // Here, return the new result from the previous with the new data
+      //     console.log('previous:', previousResult)
+      //     console.log('subscriptionData:', subscriptionData)
+
+      //     const { todos } = previousResult
+      //     const { data: { todoCreated } } = subscriptionData
+
+      //     if (todos.map(d => d.id).filter(id => id === todoCreated.id).length <= 0) {
+      //       todos.push(todoCreated)
+      //     }
+      //   }
+      // }
     }
   },
   components: {
@@ -100,7 +108,7 @@ export default {
       this.$apollo.mutate({
         // Query
         mutation: gql`mutation($text: String!) {
-          createTodo(input: { text: $text, userId: "OK" }) {
+          createTodo(input: { text: $text, userId: "OK" }) @client {
             id
             text
             done
@@ -113,25 +121,25 @@ export default {
         // Parameters
         variables: {
           text: newText
-        },
-        error (error) {
-          this.error = JSON.stringify(error.message)
-        },
+        }
+        // error (error) {
+        //   this.error = JSON.stringify(error.message)
+        // },
         // Update the cache with the result
         // The query will be updated with the optimistic response
         // and then with the real result of the mutation
-        update: (store, { data: { createTodo } }) => {
-          // Read the data from our cache for this query.
-          const data = store.readQuery({ query: todo })
-          console.log('data:', data)
-          console.log('createTodo:', createTodo)
-          // Add our tag from the mutation to the end
-          if (data.todos.map(d => d.id).filter(id => id === createTodo.id).length <= 0) {
-            data.todos.push(createTodo)
-            // Write our data back to the cache.
-            store.writeQuery({ query: todo, data })
-          }
-        }
+        // update: (store, { data: { createTodo } }) => {
+        //   // Read the data from our cache for this query.
+        //   const data = store.readQuery({ query: todo })
+        //   console.log('data:', data)
+        //   console.log('createTodo:', createTodo)
+        //   // Add our tag from the mutation to the end
+        //   if (data.todos.map(d => d.id).filter(id => id === createTodo.id).length <= 0) {
+        //     data.todos.push(createTodo)
+        //     // Write our data back to the cache.
+        //     store.writeQuery({ query: todo, data })
+        //   }
+        // }
       }).then((data) => {
         // Result
         console.log(data)
